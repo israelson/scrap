@@ -12,7 +12,6 @@ router = APIRouter()
 
 
 async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, max_results: int):
-    from app.core.config import settings
     from app.services.gmaps_scraper import scrape_businesses
 
     async with get_session_factory()() as session:

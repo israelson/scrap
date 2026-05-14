@@ -5,6 +5,27 @@ from playwright.async_api import async_playwright, Page
 
 GMAPS_BASE = "https://www.google.com"
 
+_SOCIAL_PATTERNS = [
+    ("facebook",   r"facebook\.com|fb\.com"),
+    ("instagram",  r"instagram\.com"),
+    ("youtube",    r"youtube\.com|youtu\.be"),
+    ("linkedin",   r"linkedin\.com"),
+    ("twitter",    r"twitter\.com|x\.com"),
+    ("tiktok",     r"tiktok\.com"),
+    ("linktree",   r"linktr\.ee"),
+    ("whatsapp",   r"wa\.me|whatsapp\.com"),
+]
+
+
+def classify_url(url: str) -> str:
+    if not url:
+        return "nenhum"
+    url_lower = url.lower()
+    for name, pattern in _SOCIAL_PATTERNS:
+        if re.search(pattern, url_lower):
+            return name
+    return "website"
+
 
 async def _dismiss_consent(page: Page):
     for text in ["Aceitar tudo", "Accept all", "Reject all", "Rejeitar tudo"]:
@@ -78,6 +99,8 @@ async def _extract_details(page: Page) -> dict | None:
         if category:
             break
 
+    site_tipo = classify_url(website)
+
     return {
         "place_id": None,
         "nome": name,
@@ -91,7 +114,8 @@ async def _extract_details(page: Page) -> dict | None:
         "categoria": category,
         "descricao": "",
         "site_url": website,
-        "tem_site": bool(website),
+        "site_tipo": site_tipo,
+        "tem_site": site_tipo == "website",
     }
 
 

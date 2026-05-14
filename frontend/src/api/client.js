@@ -14,6 +14,11 @@ export const leadsApi = {
   update: (id, data) => api.patch(`/leads/${id}`, data),
 }
 
+export const whatsappApi = {
+  status: () => api.get('/whatsapp/status'),
+  check: (leadIds) => api.post('/whatsapp/check', { lead_ids: leadIds }),
+}
+
 export const exportApi = {
   leads: (params = {}) => {
     const url = new URL('/api/export/leads', window.location.origin)

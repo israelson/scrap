@@ -23,6 +23,7 @@ async def list_leads(
     search_id: Optional[str] = None,
     crm_status: Optional[str] = None,
     tem_site: Optional[bool] = None,
+    site_tipo: Optional[str] = None,
     skip: int = 0,
     limit: int = 200,
     db: AsyncSession = Depends(get_db),
@@ -34,6 +35,8 @@ async def list_leads(
         query = query.where(Lead.crm_status == crm_status)
     if tem_site is not None:
         query = query.where(Lead.tem_site == tem_site)
+    if site_tipo:
+        query = query.where(Lead.site_tipo == site_tipo)
     query = query.offset(skip).limit(limit)
     result = await db.execute(query)
     return result.scalars().all()

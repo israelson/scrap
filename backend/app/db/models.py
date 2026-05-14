@@ -42,7 +42,8 @@ class Lead(Base):
     categoria = Column(String)
     descricao = Column(Text)
     site_url = Column(String)
-    tem_site = Column(Boolean, default=False)
+    tem_site = Column(Boolean, default=False)  # True apenas se for site real (não rede social)
+    site_tipo = Column(String, default="nenhum")  # nenhum/website/facebook/instagram/youtube/linkedin/twitter/tiktok/linktree/outro_social
 
     # Fase 2
     whatsapp_status = Column(String, default="not_tested")  # not_tested/has_automation/no_automation/human

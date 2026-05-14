@@ -28,6 +28,7 @@ class LeadResponse(BaseModel):
     descricao: Optional[str] = None
     site_url: Optional[str] = None
     tem_site: bool = False
+    site_tipo: str = "nenhum"
     whatsapp_status: str = "not_tested"
     crm_status: str = "not_contacted"
     canal_contato: Optional[str] = None
