@@ -1,8 +1,10 @@
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.db import database as db_module
@@ -59,3 +61,8 @@ app.include_router(whatsapp.router, prefix="/api/whatsapp", tags=["whatsapp"])
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+_static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.isdir(_static_dir):
+    app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
