@@ -12,7 +12,11 @@ async_session_factory = None
 
 def init_db(database_url: str):
     global engine, async_session_factory
-    async_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+    async_url = (
+        database_url
+        .replace("postgresql://", "postgresql+asyncpg://")
+        .replace("postgres://", "postgresql+asyncpg://")
+    )
     engine = create_async_engine(async_url, echo=False)
     async_session_factory = async_sessionmaker(engine, expire_on_commit=False)
 

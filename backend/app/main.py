@@ -34,8 +34,15 @@ async def _timeout_worker():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db_module.init_db(settings.database_url)
-    async with db_module.engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    for attempt in range(10):
+        try:
+            async with db_module.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            break
+        except Exception as e:
+            if attempt == 9:
+                raise
+            await asyncio.sleep(3)
     task = asyncio.create_task(_timeout_worker())
     yield
     task.cancel()
