@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db, get_session_factory
@@ -9,6 +9,26 @@ from app.db.models import Lead, Search
 from app.schemas.search import SearchCreate, SearchResponse
 
 router = APIRouter()
+
+
+async def _is_duplicate(session: AsyncSession, biz: dict) -> bool:
+    telefone = (biz.get("telefone") or "").strip()
+    if telefone:
+        count = await session.scalar(
+            select(func.count()).select_from(Lead).where(Lead.telefone == telefone)
+        )
+        if count:
+            return True
+    nome = (biz.get("nome") or "").strip()
+    endereco = (biz.get("endereco") or "").strip()
+    if nome and endereco:
+        count = await session.scalar(
+            select(func.count()).select_from(Lead)
+            .where(Lead.nome == nome, Lead.endereco == endereco)
+        )
+        if count:
+            return True
+    return False
 
 
 async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, max_results: int):
@@ -31,10 +51,13 @@ async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, max_res
         if error:
             search.status = "failed"
         else:
+            new_count = 0
             for biz in businesses:
-                session.add(Lead(search_id=search_id, **biz))
+                if not await _is_duplicate(session, biz):
+                    session.add(Lead(search_id=search_id, **biz))
+                    new_count += 1
             search.status = "completed"
-            search.total_found = len(businesses)
+            search.total_found = new_count
         await session.commit()
 
 

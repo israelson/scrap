@@ -22,10 +22,12 @@ export default function Leads() {
   const filters = {
     search_id: searchParams.get('search_id') || undefined,
     crm_status: searchParams.get('crm_status') || undefined,
+    whatsapp_status: searchParams.get('whatsapp_status') || undefined,
     tem_site:
       searchParams.get('tem_site') !== null && searchParams.get('tem_site') !== ''
         ? searchParams.get('tem_site') === 'true'
         : undefined,
+    q: searchParams.get('q') || undefined,
   }
 
   const { data: leads = [], isLoading } = useQuery({
@@ -79,12 +81,20 @@ export default function Leads() {
       <div className="bg-white rounded-xl px-5 py-4 shadow-sm mb-6 flex gap-3 flex-wrap items-center">
         <span className="text-xs font-medium text-gray-400 uppercase">Filtros</span>
 
+        <input
+          type="text"
+          placeholder="Buscar por nome..."
+          value={searchParams.get('q') || ''}
+          onChange={(e) => setFilter('q', e.target.value)}
+          className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none w-44"
+        />
+
         <select
           value={searchParams.get('crm_status') || ''}
           onChange={(e) => setFilter('crm_status', e.target.value)}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none"
         >
-          <option value="">Todos os status</option>
+          <option value="">Todos os status CRM</option>
           {CRM_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
@@ -101,6 +111,18 @@ export default function Leads() {
         </select>
 
         <select
+          value={searchParams.get('whatsapp_status') || ''}
+          onChange={(e) => setFilter('whatsapp_status', e.target.value)}
+          className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none"
+        >
+          <option value="">WhatsApp: todos</option>
+          <option value="not_tested">Não testado</option>
+          <option value="has_automation">Com automação</option>
+          <option value="no_automation">Sem automação</option>
+          <option value="human">Atendimento humano</option>
+        </select>
+
+        <select
           value={searchParams.get('search_id') || ''}
           onChange={(e) => setFilter('search_id', e.target.value)}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none max-w-xs"
@@ -113,7 +135,7 @@ export default function Leads() {
           ))}
         </select>
 
-        {(filters.search_id || filters.crm_status || filters.tem_site !== undefined) && (
+        {(filters.search_id || filters.crm_status || filters.tem_site !== undefined || filters.whatsapp_status || filters.q) && (
           <button
             onClick={() => setSearchParams({})}
             className="text-xs text-gray-400 hover:text-gray-600 underline"
