@@ -6,6 +6,7 @@ export const searchesApi = {
   create: (data) => api.post('/searches/', data),
   list: () => api.get('/searches/'),
   get: (id) => api.get(`/searches/${id}`),
+  clearAll: () => api.delete('/searches/all'),
 }
 
 export const leadsApi = {

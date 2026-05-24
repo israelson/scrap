@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { leadsApi, searchesApi } from '../../api/client'
 
@@ -26,6 +26,8 @@ function StatCard({ label, value, accent }) {
 }
 
 export default function Dashboard() {
+  const queryClient = useQueryClient()
+
   const { data: counts } = useQuery({
     queryKey: ['leads-count'],
     queryFn: () => leadsApi.count().then((r) => r.data),
@@ -36,16 +38,40 @@ export default function Dashboard() {
     queryFn: () => searchesApi.list().then((r) => r.data),
   })
 
+  const { mutate: clearAll, isPending: clearing } = useMutation({
+    mutationFn: () => searchesApi.clearAll(),
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    },
+  })
+
+  const handleClear = () => {
+    const first = window.confirm('Tem certeza que deseja apagar TODO o histórico?\n\nIsso irá deletar todas as buscas e leads permanentemente.')
+    if (!first) return
+    const second = window.confirm('Confirme novamente: todos os dados serão perdidos. Continuar?')
+    if (!second) return
+    clearAll()
+  }
+
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <Link
-          to="/nova-busca"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-        >
-          Nova Busca
-        </Link>
+        <div className="flex gap-3">
+          <button
+            onClick={handleClear}
+            disabled={clearing}
+            className="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
+          >
+            {clearing ? 'Limpando...' : 'Limpar histórico'}
+          </button>
+          <Link
+            to="/nova-busca"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Nova Busca
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6 mb-8">

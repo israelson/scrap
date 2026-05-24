@@ -2,7 +2,7 @@ import re
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db, get_session_factory
@@ -94,3 +94,11 @@ async def get_search(search_id: str, db: AsyncSession = Depends(get_db)):
     if not search:
         raise HTTPException(status_code=404, detail="Busca não encontrada")
     return search
+
+
+@router.delete("/all", status_code=200)
+async def clear_all(db: AsyncSession = Depends(get_db)):
+    await db.execute(delete(Lead))
+    await db.execute(delete(Search))
+    await db.commit()
+    return {"ok": True}
