@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from sqlalchemy import text
+
 from app.core.config import settings
 from app.db import database as db_module
 from app.db.models import Base
@@ -38,6 +40,8 @@ async def lifespan(app: FastAPI):
         try:
             async with db_module.engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
+                await conn.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS cidade VARCHAR"))
+                await conn.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS estado VARCHAR"))
             break
         except Exception as e:
             if attempt == 9:
