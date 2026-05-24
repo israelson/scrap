@@ -25,6 +25,8 @@ async def list_leads(
     tem_site: Optional[bool] = None,
     site_tipo: Optional[str] = None,
     whatsapp_status: Optional[str] = None,
+    cidade: Optional[str] = None,
+    estado: Optional[str] = None,
     q: Optional[str] = None,
     skip: int = 0,
     limit: int = 200,
@@ -41,11 +43,29 @@ async def list_leads(
         query = query.where(Lead.site_tipo == site_tipo)
     if whatsapp_status:
         query = query.where(Lead.whatsapp_status == whatsapp_status)
+    if estado:
+        query = query.where(Lead.estado == estado)
+    if cidade:
+        query = query.where(Lead.cidade.ilike(f"%{cidade}%"))
     if q:
         query = query.where(Lead.nome.ilike(f"%{q}%"))
     query = query.offset(skip).limit(limit)
     result = await db.execute(query)
     return result.scalars().all()
+
+
+@router.get("/locais")
+async def list_locais(db: AsyncSession = Depends(get_db)):
+    rows = await db.execute(
+        select(Lead.estado, Lead.cidade).where(Lead.cidade.isnot(None)).distinct()
+    )
+    estados, cidades = set(), set()
+    for estado, cidade in rows:
+        if estado:
+            estados.add(estado)
+        if cidade:
+            cidades.add(cidade)
+    return {"estados": sorted(estados), "cidades": sorted(cidades)}
 
 
 @router.get("/count")

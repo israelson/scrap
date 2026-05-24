@@ -23,6 +23,8 @@ export default function Leads() {
     search_id: searchParams.get('search_id') || undefined,
     crm_status: searchParams.get('crm_status') || undefined,
     whatsapp_status: searchParams.get('whatsapp_status') || undefined,
+    estado: searchParams.get('estado') || undefined,
+    cidade: searchParams.get('cidade') || undefined,
     tem_site:
       searchParams.get('tem_site') !== null && searchParams.get('tem_site') !== ''
         ? searchParams.get('tem_site') === 'true'
@@ -38,6 +40,11 @@ export default function Leads() {
   const { data: searches = [] } = useQuery({
     queryKey: ['searches'],
     queryFn: () => searchesApi.list().then((r) => r.data),
+  })
+
+  const { data: locais = { estados: [], cidades: [] } } = useQuery({
+    queryKey: ['leads-locais'],
+    queryFn: () => leadsApi.locais().then((r) => r.data),
   })
 
   const { mutate: updateLead } = useMutation({
@@ -122,6 +129,34 @@ export default function Leads() {
           <option value="human">Atendimento humano</option>
         </select>
 
+        {locais.estados.length > 0 && (
+          <select
+            value={searchParams.get('estado') || ''}
+            onChange={(e) => { setFilter('estado', e.target.value); setFilter('cidade', '') }}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none"
+          >
+            <option value="">Estado: todos</option>
+            {locais.estados.map((e) => (
+              <option key={e} value={e}>{e}</option>
+            ))}
+          </select>
+        )}
+
+        {locais.cidades.length > 0 && (
+          <select
+            value={searchParams.get('cidade') || ''}
+            onChange={(e) => setFilter('cidade', e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none"
+          >
+            <option value="">Cidade: todas</option>
+            {locais.cidades
+              .filter((c) => !filters.estado || c.toUpperCase().includes(filters.estado))
+              .map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+          </select>
+        )}
+
         <select
           value={searchParams.get('search_id') || ''}
           onChange={(e) => setFilter('search_id', e.target.value)}
@@ -135,7 +170,7 @@ export default function Leads() {
           ))}
         </select>
 
-        {(filters.search_id || filters.crm_status || filters.tem_site !== undefined || filters.whatsapp_status || filters.q) && (
+        {(filters.search_id || filters.crm_status || filters.tem_site !== undefined || filters.whatsapp_status || filters.q || filters.estado || filters.cidade) && (
           <button
             onClick={() => setSearchParams({})}
             className="text-xs text-gray-400 hover:text-gray-600 underline"

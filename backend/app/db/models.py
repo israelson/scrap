@@ -51,6 +51,10 @@ class Lead(Base):
     # Fase 3 (desabilitado)
     site_gerado_path = Column(String)
 
+    # Origem geográfica (copiada da busca)
+    cidade = Column(String)
+    estado = Column(String)
+
     # CRM
     crm_status = Column(String, default="not_contacted")  # not_contacted/contacted/interested/closed/no_interest/no_response
     canal_contato = Column(String)

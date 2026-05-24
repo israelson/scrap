@@ -11,6 +11,7 @@ export const searchesApi = {
 export const leadsApi = {
   list: (params) => api.get('/leads/', { params }),
   count: () => api.get('/leads/count'),
+  locais: () => api.get('/leads/locais'),
   update: (id, data) => api.patch(`/leads/${id}`, data),
 }
 

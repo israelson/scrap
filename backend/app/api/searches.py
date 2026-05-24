@@ -1,3 +1,4 @@
+import re
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -9,6 +10,11 @@ from app.db.models import Lead, Search
 from app.schemas.search import SearchCreate, SearchResponse
 
 router = APIRouter()
+
+
+def _extract_estado(cidade: str) -> str:
+    m = re.search(r'\b([A-Z]{2})\s*$', cidade.strip())
+    return m.group(1) if m else ""
 
 
 async def _is_duplicate(session: AsyncSession, biz: dict) -> bool:
@@ -52,9 +58,10 @@ async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, max_res
             search.status = "failed"
         else:
             new_count = 0
+            estado = _extract_estado(cidade)
             for biz in businesses:
                 if not await _is_duplicate(session, biz):
-                    session.add(Lead(search_id=search_id, **biz))
+                    session.add(Lead(search_id=search_id, cidade=cidade, estado=estado, **biz))
                     new_count += 1
             search.status = "completed"
             search.total_found = new_count
