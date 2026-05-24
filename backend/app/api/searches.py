@@ -47,9 +47,9 @@ async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, bairro:
 
     businesses = []
     error = None
+    local = f"{bairro}, {cidade}" if bairro else cidade
     try:
-        local = f"{bairro}, {cidade}" if bairro else cidade
-    businesses = await scrape_businesses(nicho, local, max_results)
+        businesses = await scrape_businesses(nicho, local, max_results)
     except Exception as e:
         error = str(e)
 
