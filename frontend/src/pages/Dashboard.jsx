@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { leadsApi, searchesApi } from '../api/client'
 
@@ -17,6 +17,21 @@ const STATUS_COLORS = {
 }
 
 export default function Dashboard() {
+  const qc = useQueryClient()
+
+  const { mutate: clearAll, isPending: clearing } = useMutation({
+    mutationFn: () => searchesApi.clearAll(),
+    onSuccess: () => qc.invalidateQueries(),
+  })
+
+  const handleClear = () => {
+    const ok1 = window.confirm('Tem certeza que deseja apagar TODO o histórico?\n\nIsso irá deletar todas as buscas e leads permanentemente.')
+    if (!ok1) return
+    const ok2 = window.confirm('Confirme novamente: todos os dados serão perdidos. Continuar?')
+    if (!ok2) return
+    clearAll()
+  }
+
   const { data: counts } = useQuery({
     queryKey: ['leads-count'],
     queryFn: () => leadsApi.count().then(r => r.data),
@@ -34,7 +49,16 @@ export default function Dashboard() {
 
   return (
     <div className="p-8">
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">Dashboard</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-gray-800">Dashboard</h2>
+        <button
+          onClick={handleClear}
+          disabled={clearing}
+          className="border border-red-300 text-red-500 text-sm px-4 py-2 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors"
+        >
+          {clearing ? 'Limpando...' : 'Limpar histórico'}
+        </button>
+      </div>
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <MetricCard label="Total de Leads" value={counts?.total ?? '—'} />

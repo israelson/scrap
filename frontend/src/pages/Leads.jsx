@@ -219,7 +219,7 @@ const CRM_MAP = Object.fromEntries(CRM_OPTIONS.map(o => [o.value, o]))
 
 export default function Leads() {
   const qc = useQueryClient()
-  const [filters, setFilters] = useState({ crm_status: '', tem_site: '', search_id: '', site_tipo: '' })
+  const [filters, setFilters] = useState({ crm_status: '', tem_site: '', search_id: '', site_tipo: '', whatsapp_status: '', estado: '', cidade: '', q: '' })
   const [briefLead, setBriefLead] = useState(null)
 
   const { data: waStatus } = useQuery({
@@ -233,6 +233,11 @@ export default function Leads() {
     queryFn: () => searchesApi.list().then(r => r.data),
   })
 
+  const { data: locais = { estados: [], cidades: [] } } = useQuery({
+    queryKey: ['leads-locais'],
+    queryFn: () => leadsApi.locais().then(r => r.data),
+  })
+
   const { data: leads, isLoading } = useQuery({
     queryKey: ['leads', filters],
     queryFn: () => leadsApi.list({
@@ -240,6 +245,10 @@ export default function Leads() {
       search_id: filters.search_id || undefined,
       tem_site: filters.tem_site === '' ? undefined : filters.tem_site === 'true',
       site_tipo: filters.site_tipo || undefined,
+      whatsapp_status: filters.whatsapp_status || undefined,
+      estado: filters.estado || undefined,
+      cidade: filters.cidade || undefined,
+      q: filters.q || undefined,
     }).then(r => r.data),
     refetchInterval: (query) => {
       const data = query.state.data
@@ -292,6 +301,14 @@ export default function Leads() {
       </div>
 
       <div className="flex gap-3 mb-5 flex-wrap">
+        <input
+          type="text"
+          placeholder="Buscar por nome..."
+          value={filters.q}
+          onChange={e => setFilter('q', e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-44"
+        />
+
         <select
           value={filters.crm_status}
           onChange={e => setFilter('crm_status', e.target.value)}
@@ -313,6 +330,42 @@ export default function Leads() {
         </select>
 
         <select
+          value={filters.whatsapp_status}
+          onChange={e => setFilter('whatsapp_status', e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">WhatsApp: todos</option>
+          <option value="not_tested">Não testado</option>
+          <option value="has_automation">Com automação</option>
+          <option value="no_automation">Sem automação</option>
+          <option value="human">Atend. humano</option>
+        </select>
+
+        {locais.estados.length > 0 && (
+          <select
+            value={filters.estado}
+            onChange={e => { setFilter('estado', e.target.value); setFilter('cidade', '') }}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Estado: todos</option>
+            {locais.estados.map(e => <option key={e} value={e}>{e}</option>)}
+          </select>
+        )}
+
+        {locais.cidades.length > 0 && (
+          <select
+            value={filters.cidade}
+            onChange={e => setFilter('cidade', e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Cidade: todas</option>
+            {locais.cidades
+              .filter(c => !filters.estado || c.toUpperCase().includes(filters.estado))
+              .map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        )}
+
+        <select
           value={filters.search_id}
           onChange={e => setFilter('search_id', e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -322,6 +375,15 @@ export default function Leads() {
             <option key={s.id} value={s.id}>{s.nicho} — {s.cidade}</option>
           ))}
         </select>
+
+        {(filters.crm_status || filters.site_tipo || filters.whatsapp_status || filters.estado || filters.cidade || filters.search_id || filters.q) && (
+          <button
+            onClick={() => setFilters({ crm_status: '', tem_site: '', search_id: '', site_tipo: '', whatsapp_status: '', estado: '', cidade: '', q: '' })}
+            className="text-xs text-gray-400 hover:text-gray-600 underline self-center"
+          >
+            Limpar filtros
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
