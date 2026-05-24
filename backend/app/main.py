@@ -42,6 +42,7 @@ async def lifespan(app: FastAPI):
                 await conn.run_sync(Base.metadata.create_all)
                 await conn.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS cidade VARCHAR"))
                 await conn.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS estado VARCHAR"))
+                await conn.execute(text("ALTER TABLE searches ADD COLUMN IF NOT EXISTS bairro VARCHAR DEFAULT ''"))
             break
         except Exception as e:
             if attempt == 9:

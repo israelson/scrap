@@ -17,6 +17,7 @@ class Search(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     nicho = Column(String, nullable=False)
     cidade = Column(String, nullable=False)
+    bairro = Column(String, default="")
     raio_km = Column(Integer, default=5)
     max_results = Column(Integer, default=20)
     status = Column(String, default="pending")  # pending/running/completed/failed

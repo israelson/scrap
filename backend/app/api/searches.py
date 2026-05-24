@@ -37,7 +37,7 @@ async def _is_duplicate(session: AsyncSession, biz: dict) -> bool:
     return False
 
 
-async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, max_results: int):
+async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, bairro: str, max_results: int):
     from app.services.gmaps_scraper import scrape_businesses
 
     async with get_session_factory()() as session:
@@ -48,7 +48,8 @@ async def run_search_task(search_id: uuid.UUID, nicho: str, cidade: str, max_res
     businesses = []
     error = None
     try:
-        businesses = await scrape_businesses(nicho, cidade, max_results)
+        local = f"{bairro}, {cidade}" if bairro else cidade
+    businesses = await scrape_businesses(nicho, local, max_results)
     except Exception as e:
         error = str(e)
 
@@ -78,7 +79,7 @@ async def create_search(
     db.add(search)
     await db.commit()
     await db.refresh(search)
-    background_tasks.add_task(run_search_task, search.id, search.nicho, search.cidade, search.max_results)
+    background_tasks.add_task(run_search_task, search.id, search.nicho, search.cidade, search.bairro or "", search.max_results)
     return search
 
 

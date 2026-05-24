@@ -4,7 +4,7 @@ import { searchesApi } from '../api/client'
 
 export default function NewSearch() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ nicho: '', cidade: '', raio_km: 5, max_results: 20 })
+  const [form, setForm] = useState({ nicho: '', cidade: '', bairro: '', raio_km: 5, max_results: 20 })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -47,10 +47,26 @@ export default function NewSearch() {
             name="cidade"
             value={form.cidade}
             onChange={handleChange}
-            placeholder="ex: Florianópolis, SC"
+            placeholder="ex: Porto Velho, RO"
             required
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Bairro / Região específica
+            <span className="text-gray-400 font-normal ml-1">(opcional)</span>
+          </label>
+          <input
+            name="bairro"
+            value={form.bairro}
+            onChange={handleChange}
+            placeholder="ex: Centro, Lagoa, Industrial..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Use para explorar áreas diferentes na mesma cidade e encontrar novos leads.
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

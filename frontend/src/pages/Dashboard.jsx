@@ -88,7 +88,9 @@ export default function Dashboard() {
               {searches.map(s => (
                 <tr key={s.id} className="hover:bg-gray-50">
                   <td className="px-6 py-3 font-medium text-gray-800 capitalize">{s.nicho}</td>
-                  <td className="px-6 py-3 text-gray-600">{s.cidade}</td>
+                  <td className="px-6 py-3 text-gray-600">
+                    {s.cidade}{s.bairro ? ` · ${s.bairro}` : ''}
+                  </td>
                   <td className="px-6 py-3 text-gray-600">{s.total_found}</td>
                   <td className="px-6 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[s.status] ?? 'bg-gray-100 text-gray-600'}`}>
